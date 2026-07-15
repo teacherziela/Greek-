@@ -1,1 +1,87 @@
-<!doctype html><html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Greek Odyssey Ultimate</title><link rel="stylesheet" href="style.css"></head><body><div id="app"><canvas id="game" width="1280" height="720"></canvas><div id="hud" class="hidden"><div class="brand">GREEK ODYSSEY</div><div class="pill">👤 <span id="hudName"></span></div><div class="pill">🪙 <span id="hudCoins">0</span></div><div class="pill">📍 <span id="hudZone">Athens</span></div><button id="soundBtn" class="pill">🔊</button></div><div id="mission" class="hidden"><small>MISI PERCUBAAN</small><b id="missionText">Cari Socrates di Agora Athens.</b></div><div id="start" class="overlay"><div class="panel"><div class="crest">🏛️</div><h1>GREEK ODYSSEY</h1><h2>Ultimate Prototype</h2><p>Versi percubaan grafik isometrik, watak beranimasi, NPC bergerak dan muzik pengembaraan.</p><input id="nameInput" placeholder="Nama murid"><button id="startBtn">MULA PENGEMBARAAN</button></div></div><div id="dialog" class="dialog hidden"><div class="portrait"></div><div class="dialogBody"><h3 id="npcName"></h3><p id="dialogText"></p><button id="closeDialog">Teruskan</button></div></div><div id="toast" class="toast hidden"></div><div id="controls" class="hidden"><div id="joystick"><div id="stick"></div></div><button id="interactBtn">INTERAKSI</button></div><div id="tip" class="hidden">WASD / anak panah • Tekan E berhampiran NPC</div></div><script src="game.js"></script></body></html>
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Greek Odyssey Live</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;background:#07111d;font-family:Arial,Helvetica,sans-serif;overflow:hidden}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center}
+#app{position:relative;width:min(100vw,1280px);aspect-ratio:16/9;background:#081421;overflow:hidden}
+canvas{width:100%;height:100%;display:block;touch-action:none}
+.hidden{display:none!important}
+#hud{position:absolute;z-index:20;top:10px;left:10px;right:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pill,.brand{padding:9px 13px;border-radius:999px;background:linear-gradient(#18314d,#0a1728);border:1px solid #d5a04a;color:#fff;font-weight:900;box-shadow:0 5px 18px #0008}
+.brand{font-family:Georgia,serif;color:#ffd66d;border-radius:12px}
+button.pill{margin:0}
+#mission{position:absolute;z-index:18;top:63px;left:12px;width:310px;background:#0b1d31ed;color:#fff;border:1px solid #d5a04a;border-radius:15px;padding:12px 14px;box-shadow:0 9px 26px #0009}
+#mission small{display:block;color:#ffd36b;font-weight:900;margin-bottom:4px}
+.overlay{position:absolute;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 32%,#21486de8,#050912f5);padding:20px}
+.panel{width:min(94%,620px);text-align:center;color:#fff;background:linear-gradient(#163451,#091626);border:2px solid #d5a04a;border-radius:25px;padding:25px;box-shadow:0 30px 90px #000d}
+.crest{font-size:62px}h1{font:900 44px Georgia,serif;color:#ffd66d;margin:4px 0}h2{color:#d8b676;margin:6px 0 16px}
+.panel p{font-size:17px;line-height:1.5;color:#e7eef6}
+input{width:100%;padding:14px;border-radius:12px;border:1px solid #c89542;background:#fff5df;font-size:17px}
+button{border:0;border-radius:13px;padding:13px 17px;font-weight:900;font-size:16px;background:linear-gradient(#e6a943,#aa6119);color:#fff;cursor:pointer;box-shadow:0 5px 0 #693607}
+.dialog{position:absolute;z-index:35;left:50%;bottom:82px;transform:translateX(-50%);display:flex;gap:16px;width:min(94%,760px);padding:16px;background:linear-gradient(#142b45,#081625);border:2px solid #d5a04a;border-radius:20px;color:#fff;box-shadow:0 24px 70px #000d}
+.portrait{width:120px;min-width:120px;height:120px;border-radius:16px;background:radial-gradient(circle,#f1d5a8,#976332);display:flex;align-items:center;justify-content:center;font-size:72px;border:2px solid #d5a04a}
+.dialog h3{margin:0;color:#ffd36b;font:900 28px Georgia,serif}.dialog p{font-size:18px;line-height:1.5}
+#controls{position:absolute;z-index:25;left:0;right:0;bottom:15px;display:flex;justify-content:space-between;align-items:end;padding:0 20px;pointer-events:none}
+#joy{width:118px;height:118px;border-radius:50%;background:#ffffff22;border:3px solid #ffffffaa;position:relative;pointer-events:auto;touch-action:none}
+#stick{width:50px;height:50px;border-radius:50%;background:#f6f8fb;position:absolute;left:31px;top:31px;box-shadow:0 5px 14px #0008}
+#interact{width:132px;height:86px;border-radius:50%;border:3px solid #ffd18a;pointer-events:auto}
+#tip{position:absolute;z-index:12;left:50%;bottom:5px;transform:translateX(-50%);padding:5px 11px;border-radius:999px;background:#000b;color:#fff;font-size:12px}
+@media(max-width:700px){h1{font-size:33px}.panel{padding:18px}.dialog{bottom:108px;padding:12px}.portrait{width:90px;min-width:90px;height:100px}#mission{top:100px;width:245px;font-size:13px}}
+</style>
+</head>
+<body>
+<div id="app">
+<canvas id="game" width="1280" height="720"></canvas>
+<div id="hud" class="hidden"><div class="brand">GREEK ODYSSEY LIVE</div><div class="pill">👤 <span id="hn"></span></div><div class="pill">🪙 <span id="hc">0</span></div><div class="pill">📍 <span id="hz">Agora Athens</span></div><button id="sound" class="pill">🔊</button></div>
+<div id="mission" class="hidden"><small>MISI</small><b id="mt">Cari Socrates di Agora Athens.</b></div>
+<div id="start" class="overlay"><div class="panel"><div class="crest">🏛️</div><h1>GREEK ODYSSEY</h1><h2>Live World Prototype</h2><p>Dunia lebih hidup: air bergerak, pokok bergoyang, obor menyala, burung terbang, NPC berjalan dan kamera lembut.</p><input id="name" placeholder="Nama murid"><button id="startBtn">MULA PENGEMBARAAN</button></div></div>
+<div id="dialog" class="dialog hidden"><div class="portrait">👴</div><div><h3 id="npc"></h3><p id="text"></p><button id="close">Teruskan</button></div></div>
+<div id="controls" class="hidden"><div id="joy"><div id="stick"></div></div><button id="interact">INTERAKSI</button></div>
+<div id="tip" class="hidden">WASD / anak panah • E untuk interaksi</div>
+</div>
+<script>
+const c=document.getElementById('game'),x=c.getContext('2d'),$=id=>document.getElementById(id);
+const W={w:2600,h:1700},S={run:false,sound:true,name:'',coins:0,keys:{},cam:{x:0,y:0},targetCam:{x:0,y:0},zone:'Agora Athens'};
+const P={x:520,y:840,speed:270,step:0};
+const npcs=[
+ {name:'Socrates',x:650,y:760,baseX:650,range:90,v:22,dir:1,emoji:'👴',text:'Ilmu bermula apabila kita berani bertanya dan menilai jawapan.'},
+ {name:'Plato',x:1450,y:520,baseX:1450,range:80,v:18,dir:-1,emoji:'📜',text:'Selamat datang ke Akademi. Gunakan akal untuk mencari kebenaran.'},
+ {name:'Leonidas',x:2010,y:1120,baseX:2010,range:70,v:20,dir:1,emoji:'⚔️',text:'Welcome to Sparta. Discipline and courage will guide you.'}
+];
+const coins=Array.from({length:28},(_,i)=>({x:340+(i*379)%2050,y:260+(i*229)%1150,t:false,p:i*.7}));
+const birds=Array.from({length:8},(_,i)=>({x:i*330,y:160+(i%3)*70,s:55+i*4,p:i}));
+const particles=[];
+let ac=null,music=null;
+function tone(f,d=.16,type='sine',v=.03,delay=0){if(!S.sound)return;if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();const t=ac.currentTime+delay,o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d+.03)}
+function startMusic(){if(music||!S.sound)return;const n=[220,261.6,293.7,329.6,293.7,261.6,196,220];let i=0;music=setInterval(()=>{tone(n[i%8],.48,'triangle',.016);if(i%2===0)tone(n[i%8]/2,.65,'sine',.01);i++},520)}
+function stopMusic(){clearInterval(music);music=null}
+function tree(px,py,s=1,p=0){const sway=Math.sin(performance.now()/700+p)*6;x.save();x.translate(px,py);x.scale(s,s);x.fillStyle='rgba(0,0,0,.18)';x.beginPath();x.ellipse(8,28,30,11,0,0,Math.PI*2);x.fill();x.fillStyle='#654324';x.fillRect(-5,-5,10,42);x.translate(sway,0);x.fillStyle='#2e6f3d';x.beginPath();x.arc(0,-25,28,0,Math.PI*2);x.fill();x.fillStyle='#438b4d';x.beginPath();x.arc(-16,-10,23,0,Math.PI*2);x.arc(17,-10,23,0,Math.PI*2);x.fill();x.restore()}
+function temple(px,py,s=1){x.save();x.translate(px,py);x.scale(s,s);x.fillStyle='rgba(0,0,0,.2)';x.beginPath();x.ellipse(18,75,125,35,0,0,Math.PI*2);x.fill();x.fillStyle='#f0dfb8';x.fillRect(-105,-8,210,95);x.fillStyle='#ad7633';x.beginPath();x.moveTo(-125,-8);x.lineTo(0,-105);x.lineTo(125,-8);x.closePath();x.fill();x.fillStyle='#bf8b4b';x.fillRect(-115,-8,230,18);for(let i=0;i<7;i++){x.fillStyle='#d1a463';x.fillRect(-88+i*29,14,12,63)}x.fillStyle='#94612e';x.fillRect(-120,75,240,16);x.restore()}
+function torch(px,py,p=0){const t=performance.now()/120+p;x.fillStyle='#6f4728';x.fillRect(px-4,py,8,34);for(let i=0;i<3;i++){x.fillStyle=i===0?'#ffef6a':i===1?'#ff9b2f':'#e94a1f';x.beginPath();x.ellipse(px+Math.sin(t+i)*4,py-8-i*4,10-i*2,15-i*3,0,0,Math.PI*2);x.fill()}particles.push({x:px,y:py-18,vx:(Math.random()-.5)*12,vy:-20-Math.random()*15,a:1})}
+function human(px,py,type='player',step=0){const pal={player:['#d0a077','#2369a8','#2f221b'],sage:['#dfc8a8','#eee1cc','#66605a'],scholar:['#d7ba90','#7e5ca9','#473b35'],warrior:['#c98e68','#9d302f','#35231d']}[type];const [skin,cloth,hair]=pal,b=Math.sin(step)*2,sw=Math.sin(step)*7;x.save();x.translate(px,py+b);x.fillStyle='rgba(0,0,0,.2)';x.beginPath();x.ellipse(0,30,20,7,0,0,Math.PI*2);x.fill();x.strokeStyle='#35271f';x.lineWidth=7;x.beginPath();x.moveTo(-8,11);x.lineTo(-10-sw*.2,31);x.stroke();x.beginPath();x.moveTo(8,11);x.lineTo(10+sw*.2,31);x.stroke();x.fillStyle=cloth;x.beginPath();x.moveTo(-18,-16);x.lineTo(18,-16);x.lineTo(23,16);x.lineTo(-23,16);x.fill();x.strokeStyle=skin;x.lineWidth=7;x.beginPath();x.moveTo(-17,-9);x.lineTo(-25,10+sw);x.stroke();x.beginPath();x.moveTo(17,-9);x.lineTo(25,10-sw);x.stroke();x.fillStyle=skin;x.beginPath();x.arc(0,-32,15,0,Math.PI*2);x.fill();x.fillStyle=hair;x.beginPath();x.arc(0,-38,15,Math.PI,0);x.fill();if(type==='sage'||type==='scholar'){x.beginPath();x.arc(0,-25,10,0,Math.PI);x.fill()}if(type==='warrior'){x.strokeStyle='#d6aa44';x.lineWidth=5;x.beginPath();x.arc(0,-34,21,Math.PI,0);x.stroke()}x.restore()}
+function draw(){const g=x.createLinearGradient(0,0,0,c.height);g.addColorStop(0,'#68c5ef');g.addColorStop(1,'#e8f8ff');x.fillStyle=g;x.fillRect(0,0,c.width,c.height);x.save();x.translate(-S.cam.x,-S.cam.y);x.fillStyle='#74b56a';x.fillRect(0,0,W.w,W.h);
+x.fillStyle='#3a9ed2';x.beginPath();x.moveTo(0,1300);x.bezierCurveTo(600,1130,1180,1510,1800,1300);x.bezierCurveTo(2200,1190,2400,1270,2600,1160);x.lineTo(2600,1700);x.lineTo(0,1700);x.fill();
+for(let i=0;i<20;i++){x.strokeStyle='rgba(180,235,255,.75)';x.lineWidth=4;x.beginPath();x.arc(100+i*140,1360+Math.sin(performance.now()/500+i)*22,55,0,Math.PI);x.stroke()}
+x.strokeStyle='#cfb37e';x.lineWidth=130;x.lineCap='round';x.beginPath();x.moveTo(180,850);x.lineTo(2350,850);x.stroke();x.beginPath();x.moveTo(1100,180);x.lineTo(1100,1440);x.stroke();
+temple(690,620,1.05);temple(1420,370,.95);temple(1990,980,.9);
+for(let i=0;i<40;i++)tree(130+(i*257)%2300,170+(i*193)%1200,.85+(i%3)*.08,i);
+for(let i=0;i<7;i++)torch(420+i*290,810,i);
+birds.forEach(b=>{b.x+=b.s*.016;if(b.x>W.w+100)b.x=-100;const yy=b.y+Math.sin(performance.now()/350+b.p)*18;x.strokeStyle='#1c3140';x.lineWidth=3;x.beginPath();x.arc(b.x,yy,12,Math.PI,0);x.arc(b.x+24,yy,12,Math.PI,0);x.stroke()});
+coins.forEach(o=>{if(o.t)return;const bob=Math.sin(performance.now()/300+o.p)*7,sc=.7+.3*Math.abs(Math.sin(performance.now()/250+o.p));x.save();x.translate(o.x,o.y+bob);x.scale(sc,1);x.fillStyle='#ffd44d';x.beginPath();x.arc(0,0,10,0,Math.PI*2);x.fill();x.strokeStyle='#a36a00';x.lineWidth=3;x.stroke();x.restore()});
+npcs.forEach(n=>{human(n.x,n.y,n.name==='Socrates'?'sage':n.name==='Plato'?'scholar':'warrior',performance.now()/300);x.fillStyle='#fff';x.font='bold 15px Arial';x.fillText(n.name,n.x-38,n.y+48)});
+human(P.x,P.y,'player',P.step);x.fillStyle='#fff';x.font='bold 14px Arial';x.fillText(S.name||'Murid',P.x-28,P.y+48);
+for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx*.016;p.y+=p.vy*.016;p.a-=.025;x.fillStyle=`rgba(255,210,90,${p.a})`;x.beginPath();x.arc(p.x,p.y,2,0,Math.PI*2);x.fill();if(p.a<=0)particles.splice(i,1)}
+x.restore()}
+function update(dt){if(!S.run||!$('dialog').classList.contains('hidden'))return;let dx=0,dy=0;if(S.keys.ArrowLeft||S.keys.a)dx--;if(S.keys.ArrowRight||S.keys.d)dx++;if(S.keys.ArrowUp||S.keys.w)dy--;if(S.keys.ArrowDown||S.keys.s)dy++;dx+=joyv.x;dy+=joyv.y;const l=Math.hypot(dx,dy);if(l){dx/=l;dy/=l;P.x+=dx*P.speed*dt;P.y+=dy*P.speed*dt;P.step+=dt*9}P.x=Math.max(40,Math.min(W.w-40,P.x));P.y=Math.max(40,Math.min(W.h-40,P.y));S.targetCam.x=Math.max(0,Math.min(W.w-c.width,P.x-c.width/2));S.targetCam.y=Math.max(0,Math.min(W.h-c.height,P.y-c.height/2));S.cam.x+=(S.targetCam.x-S.cam.x)*.08;S.cam.y+=(S.targetCam.y-S.cam.y)*.08;npcs.forEach(n=>{n.x+=n.dir*n.v*dt;if(Math.abs(n.x-n.baseX)>n.range)n.dir*=-1});coins.forEach(o=>{if(!o.t&&Math.hypot(P.x-o.x,P.y-o.y)<32){o.t=true;S.coins++;$('hc').textContent=S.coins;tone(800,.08,'square',.05);tone(1100,.12,'square',.035,.06)}});S.zone=P.x<1050?'Agora Athens':P.x<1650?"Plato's Academy":P.y<800?'Olympia':'Sparta';$('hz').textContent=S.zone}
+function interact(){if(!S.run)return;let n=null,d=95;npcs.forEach(q=>{const z=Math.hypot(P.x-q.x,P.y-q.y);if(z<d){d=z;n=q}});if(!n)return; $('npc').textContent=n.name;$('text').textContent=n.text;$('dialog').classList.remove('hidden');if(n.name==='Socrates')$('mt').textContent="Pergi ke Plato's Academy."}
+$('startBtn').onclick=()=>{const n=$('name').value.trim();if(!n)return alert('Masukkan nama murid.');S.name=n;S.run=true;$('hn').textContent=n;$('start').classList.add('hidden');$('hud').classList.remove('hidden');$('mission').classList.remove('hidden');$('controls').classList.remove('hidden');$('tip').classList.remove('hidden');startMusic()};
+$('sound').onclick=()=>{S.sound=!S.sound;$('sound').textContent=S.sound?'🔊':'🔇';if(S.sound)startMusic();else stopMusic()};$('close').onclick=()=>$('dialog').classList.add('hidden');$('interact').onpointerdown=interact;addEventListener('keydown',e=>{S.keys[e.key]=true;if(e.key==='e'||e.key==='E'||e.key===' ')interact()});addEventListener('keyup',e=>S.keys[e.key]=false);
+let joyv={x:0,y:0},active=false,j=$('joy'),st=$('stick');function setJoy(e){const r=j.getBoundingClientRect();let dx=e.clientX-r.left-r.width/2,dy=e.clientY-r.top-r.height/2,m=35,l=Math.hypot(dx,dy)||1;if(l>m){dx=dx/l*m;dy=dy/l*m}st.style.left=31+dx+'px';st.style.top=31+dy+'px';joyv={x:dx/m,y:dy/m}}j.onpointerdown=e=>{active=true;j.setPointerCapture(e.pointerId);setJoy(e)};j.onpointermove=e=>{if(active)setJoy(e)};j.onpointerup=j.onpointercancel=()=>{active=false;joyv={x:0,y:0};st.style.left='31px';st.style.top='31px'};
+let last=performance.now();function loop(now){const dt=Math.min(.033,(now-last)/1000);last=now;update(dt);draw();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+</script>
+</body>
+</html>
